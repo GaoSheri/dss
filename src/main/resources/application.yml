@@ -1,0 +1,13 @@
+server:
+  servlet:
+    context-path: /dss
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: sheri1258
+    url: jdbc:mysql://127.0.0.1/enterprise?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT
+
+mybatis-plus:
+  mapper-locations: classpath*:/gaoxuanli/dss/*/mapper/*Mapper.xml
+  typeAliasesPackage: gaoxuanli.dss.*.entity
