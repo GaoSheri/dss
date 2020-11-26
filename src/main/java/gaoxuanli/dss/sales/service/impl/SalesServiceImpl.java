@@ -2,6 +2,7 @@ package gaoxuanli.dss.sales.service.impl;
 
 import gaoxuanli.dss.sales.entity.SalesElems;
 import gaoxuanli.dss.sales.service.SalesService;
+import gaoxuanli.dss.sales.util.DSSChartUtil;
 import gaoxuanli.dss.sales.util.ModelBaseUtil;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
@@ -18,6 +19,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class SalesServiceImpl implements SalesService {
@@ -25,10 +29,12 @@ public class SalesServiceImpl implements SalesService {
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
     private ModelBaseUtil modelBaseUtil;
+    private DSSChartUtil dssChartUtil;
     private List<SalesElems> data;
 
     public SalesServiceImpl() {
         modelBaseUtil = new ModelBaseUtil();
+        dssChartUtil = new DSSChartUtil();
     }
 
     @Override
@@ -57,7 +63,29 @@ public class SalesServiceImpl implements SalesService {
         });
 
         String formula = modelBaseUtil.oneVarLinearRegressionModel(xVar, yVar, x, y);
+        System.out.println("formula: " + formula);
+        return formula;
+    }
 
-            return null;
+    @Override
+    public File getCurveChart(String x, String y) {
+        return dssChartUtil.getCurveChart(x, y);
+    }
+
+    @Override
+    public File getLinearChart(String formulaKey) {
+        Matcher m = Pattern.compile("(.*)_(.*)").matcher(formulaKey);
+        String x = m.group(1), y = m.group(2);
+        Double[][] dots = new Double[][]{
+                modelBaseUtil.getColumnData(x).toArray(new Double[]{}),
+                modelBaseUtil.getColumnData(y).toArray(new Double[]{})
+        };
+        Map<String, Double> argsMap = modelBaseUtil.getArgs(formulaKey);
+        return DSSChartUtil.getLinearChart(argsMap.get("a"), argsMap.get("b"), dots, x, y);
+    }
+
+    @Override
+    public void doKmeans(int k) {
+        modelBaseUtil.doKmeans(k);
     }
 }

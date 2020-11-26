@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,6 +26,7 @@ public class SalesElemsController {
         List<SalesElems> list = salesService.dataList();
         System.out.println(list.size());
         model.addAttribute("list", list);
+        // 跳转到templates/dataTable.html
         return "dataTable";
     }
     
@@ -31,5 +34,16 @@ public class SalesElemsController {
     public String test(){
         return "test";
     }
+
+    @ResponseBody
+    @GetMapping("/linear/onevar/{x}/{y}")
+    public String oneVarLinearRegression(
+            @PathVariable String x,
+            @PathVariable String y
+    ) {
+        return (String)salesService.oneVarLinear(x, y);
+    }
+
+
 
 }
