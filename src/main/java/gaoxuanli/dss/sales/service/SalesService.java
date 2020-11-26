@@ -13,7 +13,11 @@ public interface SalesService {
 
     File getCurveChart(String x, String y);
 
-    File getLinearChart(String formulaKey);
+    Double[][] getDots(String x, String y);
+
+    List<Double> getColumnData(String c);
+
+    File getLinearChart(String x, String y);
 
     void doKmeans(int k);
 }

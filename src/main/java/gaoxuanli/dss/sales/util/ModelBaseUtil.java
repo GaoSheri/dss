@@ -1,37 +1,52 @@
 package gaoxuanli.dss.sales.util;
 
+import gaoxuanli.dss.sales.entity.SalesElems;
+import gaoxuanli.dss.sales.service.impl.SalesServiceImpl;
+import kmeans.kmeans;
+import kmeans.kmeans_data;
+import kmeans.kmeans_param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import kmeans.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-
+/*
+    模型库
+ */
+@Service
 public class ModelBaseUtil {
-    // 模型库
-    // 需求预测模型
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate jdbcTemplate;  // 数据库
+    private DataSource dataSource;
+
+
+
+    // 需求预测模型
 
     /**
      * oneVarLinearMap 格式如：
      * {
-     * "proceeds_ad": {
-     * "a": 123.456,
-     * "b": 123.456
-     * },
-     * "price_proceeds": {
-     * "a": 123.456,
-     * "b": 123.456
+     * "proceeds_ad": { "a": 123.456, "b": 123.456 },
+     * "price_proceeds": { "a": 123.456, "b": 123.456 }
      * }
+     * formulaMap 格式如：
+     * {
+     * "proceeds_ad": "y = 12.3456 + 12.3456x",
+     * "price_proceeds": "y = 21.3456 + 21.3456x"
      * }
      */
     public Map<String, Map<String, Double>> oneVarLinearMap = new HashMap<>();
     private Map<String, String> formulaMap = new HashMap<>();
 
+    // 获取公式的参数值（如 a, b）
     public Map<String, Double> getArgs(String formulaKey) {
         if (formulaMap.containsKey(formulaKey)) {
             return oneVarLinearMap.get(formulaKey);
@@ -40,24 +55,26 @@ public class ModelBaseUtil {
         return null;
     }
 
+    // 获取指定列数据列表
     public List<Double> getColumnData(String column) {
-        List<Double> list = new ArrayList<>();
-        jdbcTemplate.query("select " + column + " from t_sales_elems",
-                rs -> {
-                    list.add(rs.getDouble(column));
-                });
-        return list;
+        List<Double> data = new ArrayList<>();
+        List<SalesElems> datalist = jdbcTemplate.query("select * from t_sales_elems", new SalesElems());
+        datalist.forEach(se -> data.add(se.getColumn(column)));
+        return data;
     }
 
     // 一元线性回归模型
     public String oneVarLinearRegressionModel(List<Double> varX, List<Double> varY, String xName, String yName) {
         String key = xName.concat("_").concat(yName);
         if (oneVarLinearMap.containsKey(key)) {
+            // 若曾计算过该公式，则无需重复计算
             return formulaMap.get(key);
         }
         double b = l(varX, varY) / l(varX, varX);
         double a = avr(varY) - (b * avr(varX));
+        // 生成直观公式字符串返回
         String formula = "y = " + String.format("%.4f", a) + " + " + String.format("%.4f", b) + "x";
+        // 存入公式 map
         formulaMap.put(key, formula);
         return formula;
     }
@@ -86,16 +103,14 @@ public class ModelBaseUtil {
         }
         double a = oneVarLinearMap.get(formulaKey).get("a");
         double b = oneVarLinearMap.get(formulaKey).get("b");
+        // 返回计算所得 yValue
         return a + (b * xValue);
     }
 
     // 聚类
-    /*
-    客户号	2008年（万元）	2009年（万元）	2010年（万元）	将来业务量（万元）
-    （序号）
-     */
     public Map<String, List<Double>> doKmeans(int k) {
         double[][] points = {
+                // 客户号| 2008| 2009| 2010| 将来业务量（万元）
                 {18.27, 50.48, 9.99, 78.74},
                 {22.22, 60.77, 11.70, 94.70},
                 {17.16, 45.09, 10.32, 72.56},
@@ -121,7 +136,7 @@ public class ModelBaseUtil {
         kmeans_param param = new kmeans_param();
         param.initCenterMehtod = kmeans_param.CENTER_RANDOM;
 
-        // 划分为4类
+        // 划分为 k 类
         kmeans.doKmeans(k, data, param);
 
         // 输出结果
@@ -129,6 +144,10 @@ public class ModelBaseUtil {
         for (int label : data.labels) {
             System.out.println(label + " ");
         }
+//
+//        for (int i = 0; i < ; i++) {
+//
+//        }
         return null;
     }
 

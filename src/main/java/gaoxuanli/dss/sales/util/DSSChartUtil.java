@@ -1,5 +1,6 @@
 package gaoxuanli.dss.sales.util;
 
+import gaoxuanli.dss.sales.entity.SalesElems;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
@@ -10,6 +11,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.io.File;
@@ -18,6 +20,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+@Service
 public class DSSChartUtil {
 
     ModelBaseUtil modelBaseUtil = new ModelBaseUtil();
@@ -70,7 +73,7 @@ public class DSSChartUtil {
 
     public static File printPic(JFreeChart chart, String filename) {
         FileOutputStream out = null;
-        String path = "D:\\Workspace\\sales\\output\\chart_" + filename + ".png";
+        String path = "D:\\Workspace\\sales\\src\\main\\resources\\static\\pic\\chart_" + filename + ".png";
         File output = new File(path);
         try {
             if (!output.getParentFile().exists()) {
@@ -90,7 +93,7 @@ public class DSSChartUtil {
                 }
             }
         }
-        return output;
+        return new File(path);
     }
 
 }

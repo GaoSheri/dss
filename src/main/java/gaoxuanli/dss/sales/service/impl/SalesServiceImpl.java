@@ -11,6 +11,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -28,14 +30,20 @@ public class SalesServiceImpl implements SalesService {
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
+    @Autowired
     private ModelBaseUtil modelBaseUtil;
+    @Autowired
     private DSSChartUtil dssChartUtil;
-    private List<SalesElems> data;
+    private static List<SalesElems> data;
 
-    public SalesServiceImpl() {
-        modelBaseUtil = new ModelBaseUtil();
-        dssChartUtil = new DSSChartUtil();
+    public List<SalesElems> getData() {
+        return data;
     }
+//
+//    public SalesServiceImpl() {
+//        modelBaseUtil = new ModelBaseUtil();
+//        dssChartUtil = new DSSChartUtil();
+//    }
 
     @Override
     public List<SalesElems> dataList() {
@@ -52,19 +60,30 @@ public class SalesServiceImpl implements SalesService {
 
     @Override
     public Object oneVarLinear(String x, String y) {
-        List<Double> xVar = new ArrayList<>();
-        List<Double> yVar = new ArrayList<>();
-        // 若为空则初始化操作
-        if (data == null) dataList();
-        // 初始化 x 和 y 的数据集
-        data.forEach(se -> {
-            xVar.add(se.getColumn(x));
-            yVar.add(se.getColumn(y));
-        });
-
-        String formula = modelBaseUtil.oneVarLinearRegressionModel(xVar, yVar, x, y);
+        Double[][] dots = getDots(x, y);
+        String formula = modelBaseUtil.oneVarLinearRegressionModel(
+                Arrays.asList(dots[0]), Arrays.asList(dots[1]), x, y);
         System.out.println("formula: " + formula);
         return formula;
+    }
+
+    // private
+    @Override
+    public Double[][] getDots(String x, String y) {
+        // 若为空则初始化操作
+        if (data == null) dataList();
+        Double[][] dots = new Double[2][data.size()];
+        // 输入（x, y）形成点集
+        for (int i = 0; i < data.size(); i++) {
+            dots[0][i] = data.get(i).getColumn(x);
+            dots[1][i] = data.get(i).getColumn(y);
+        }
+        return dots;
+    }
+
+    @Override
+    public List<Double> getColumnData(String c) {
+        return modelBaseUtil.getColumnData(c);
     }
 
     @Override
@@ -73,14 +92,12 @@ public class SalesServiceImpl implements SalesService {
     }
 
     @Override
-    public File getLinearChart(String formulaKey) {
-        Matcher m = Pattern.compile("(.*)_(.*)").matcher(formulaKey);
-        String x = m.group(1), y = m.group(2);
-        Double[][] dots = new Double[][]{
-                modelBaseUtil.getColumnData(x).toArray(new Double[]{}),
-                modelBaseUtil.getColumnData(y).toArray(new Double[]{})
-        };
+    public File getLinearChart(String x, String y) {
+        String formulaKey = x + "_" + y;
+        System.out.println("getLinearChart: " + formulaKey);
+        Double[][] dots = getDots(x, y);
         Map<String, Double> argsMap = modelBaseUtil.getArgs(formulaKey);
+        System.out.println("a: " + argsMap.get("a") + ", b: " + argsMap.get("b"));
         return DSSChartUtil.getLinearChart(argsMap.get("a"), argsMap.get("b"), dots, x, y);
     }
 
