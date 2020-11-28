@@ -2,19 +2,16 @@ package gaoxuanli.dss.sales.controller;
 
 import gaoxuanli.dss.sales.entity.SalesElems;
 import gaoxuanli.dss.sales.service.SalesService;
+import org.jfree.data.json.impl.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 //重定向不应用RestController
 @Controller
@@ -25,6 +22,7 @@ public class SalesElemsController {
     private SalesService salesService;
 
     @RequestMapping("/dataTable")
+    // 销售数据表
     public String getOriData(Model model) {
         List<SalesElems> list = salesService.dataList();
         System.out.println(list.size());
@@ -32,40 +30,29 @@ public class SalesElemsController {
         // 跳转到templates/dataTable.html
         return "dataTable";
     }
-    
-    @GetMapping("/test")
-    public String test(){
-        return "test";
-    }
 
     @ResponseBody
     @GetMapping("/linear/onevar/{x}/{y}")
+    // 一元线性回归预测模型
     public String oneVarLinearRegression(
             @PathVariable String x,
             @PathVariable String y
     ) {
-        return (String)salesService.oneVarLinear(x, y);
+        return (String) salesService.oneVarLinear(x, y);
     }
 
     @ResponseBody
-    @GetMapping(value = "/image/linear/{x}/{y}", produces = MediaType.IMAGE_PNG_VALUE)
-    public BufferedImage getLinearChartPic(
-            @PathVariable String x,
-            @PathVariable String y
-    ) throws IOException {
-        System.out.println("x: " + x + ", y: " + y);
-        return ImageIO.read(salesService.getLinearChart(x, y));
+    @GetMapping(value = "/linear/programming/ad")
+    // 广告决策 - 线性规划模型
+    public JSONObject adDecision(@RequestParam List<Double> weight,
+                                 @RequestParam Map<String, Double> limit,
+                                 @RequestParam List<Double> params,
+                                 @RequestParam String signal) {
+        List<Map<List<Double>, String>> conditions = new ArrayList<>();
+        Map<List<Double>, String> cond = new HashMap<>();
+        cond.put(params, signal);
+        conditions.add(cond);
+        return salesService.getPossibleSolution(weight, limit, conditions);
     }
-
-    @ResponseBody
-    @GetMapping(value = "/image/curve/{x}/{y}", produces = MediaType.IMAGE_PNG_VALUE)
-    public BufferedImage getCurveChartPic(
-            @PathVariable String x,
-            @PathVariable String y
-    ) throws IOException {
-        return ImageIO.read(salesService.getCurveChart(x, y));
-    }
-
-
 
 }

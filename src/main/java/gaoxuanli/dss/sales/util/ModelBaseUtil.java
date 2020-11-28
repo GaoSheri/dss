@@ -25,9 +25,6 @@ public class ModelBaseUtil {
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;  // 数据库
-    private DataSource dataSource;
-
-
 
     // 需求预测模型
 
@@ -76,6 +73,10 @@ public class ModelBaseUtil {
         String formula = "y = " + String.format("%.4f", a) + " + " + String.format("%.4f", b) + "x";
         // 存入公式 map
         formulaMap.put(key, formula);
+        Map<String, Double> args = new HashMap<>();
+        args.put("a", a);
+        args.put("b", b);
+        oneVarLinearMap.put(key, args);
         return formula;
     }
 

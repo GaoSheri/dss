@@ -23,7 +23,8 @@ import java.util.List;
 @Service
 public class DSSChartUtil {
 
-    ModelBaseUtil modelBaseUtil = new ModelBaseUtil();
+    @Autowired
+    ModelBaseUtil modelBaseUtil;
 
     // 生成关系曲线图对象 JFreeChart 输出为图像并返回
     public File getCurveChart(String elem1, String elem2) {

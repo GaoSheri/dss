@@ -3,10 +3,12 @@ package gaoxuanli.dss.sales.service.impl;
 import gaoxuanli.dss.sales.entity.SalesElems;
 import gaoxuanli.dss.sales.service.SalesService;
 import gaoxuanli.dss.sales.util.DSSChartUtil;
+import gaoxuanli.dss.sales.util.Equations;
 import gaoxuanli.dss.sales.util.ModelBaseUtil;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
+import org.jfree.data.json.impl.JSONObject;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +41,6 @@ public class SalesServiceImpl implements SalesService {
     public List<SalesElems> getData() {
         return data;
     }
-//
-//    public SalesServiceImpl() {
-//        modelBaseUtil = new ModelBaseUtil();
-//        dssChartUtil = new DSSChartUtil();
-//    }
 
     @Override
     public List<SalesElems> dataList() {
@@ -57,7 +54,6 @@ public class SalesServiceImpl implements SalesService {
         return datalist;
     }
 
-
     @Override
     public Object oneVarLinear(String x, String y) {
         Double[][] dots = getDots(x, y);
@@ -67,7 +63,7 @@ public class SalesServiceImpl implements SalesService {
         return formula;
     }
 
-    // private
+    // TODO: private
     @Override
     public Double[][] getDots(String x, String y) {
         // 若为空则初始化操作
@@ -99,6 +95,14 @@ public class SalesServiceImpl implements SalesService {
         Map<String, Double> argsMap = modelBaseUtil.getArgs(formulaKey);
         System.out.println("a: " + argsMap.get("a") + ", b: " + argsMap.get("b"));
         return DSSChartUtil.getLinearChart(argsMap.get("a"), argsMap.get("b"), dots, x, y);
+    }
+
+    @Override
+    public JSONObject getPossibleSolution(
+            List<Double> weight, Map<String, Double> limit,
+            List<Map<List<Double>, String>> conditions) {
+        Equations equations = new Equations(weight, limit, conditions);
+        return equations.getResult();
     }
 
     @Override
