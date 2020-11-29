@@ -5,27 +5,15 @@ import gaoxuanli.dss.sales.service.SalesService;
 import gaoxuanli.dss.sales.util.DSSChartUtil;
 import gaoxuanli.dss.sales.util.Equations;
 import gaoxuanli.dss.sales.util.ModelBaseUtil;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtils;
-import org.jfree.chart.JFreeChart;
 import org.jfree.data.json.impl.JSONObject;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class SalesServiceImpl implements SalesService {
@@ -36,6 +24,7 @@ public class SalesServiceImpl implements SalesService {
     private ModelBaseUtil modelBaseUtil;
     @Autowired
     private DSSChartUtil dssChartUtil;
+
     private static List<SalesElems> data;
 
     public List<SalesElems> getData() {
@@ -55,7 +44,7 @@ public class SalesServiceImpl implements SalesService {
     }
 
     @Override
-    public Object oneVarLinear(String x, String y) {
+    public String oneVarLinear(String x, String y) {
         Double[][] dots = getDots(x, y);
         String formula = modelBaseUtil.oneVarLinearRegressionModel(
                 Arrays.asList(dots[0]), Arrays.asList(dots[1]), x, y);
@@ -63,9 +52,8 @@ public class SalesServiceImpl implements SalesService {
         return formula;
     }
 
-    // TODO: private
-    @Override
-    public Double[][] getDots(String x, String y) {
+    // 获取由指定两列字段组成的点集
+    private Double[][] getDots(String x, String y) {
         // 若为空则初始化操作
         if (data == null) dataList();
         Double[][] dots = new Double[2][data.size()];
@@ -83,21 +71,6 @@ public class SalesServiceImpl implements SalesService {
     }
 
     @Override
-    public File getCurveChart(String x, String y) {
-        return dssChartUtil.getCurveChart(x, y);
-    }
-
-    @Override
-    public File getLinearChart(String x, String y) {
-        String formulaKey = x + "_" + y;
-        System.out.println("getLinearChart: " + formulaKey);
-        Double[][] dots = getDots(x, y);
-        Map<String, Double> argsMap = modelBaseUtil.getArgs(formulaKey);
-        System.out.println("a: " + argsMap.get("a") + ", b: " + argsMap.get("b"));
-        return DSSChartUtil.getLinearChart(argsMap.get("a"), argsMap.get("b"), dots, x, y);
-    }
-
-    @Override
     public JSONObject getPossibleSolution(
             List<Double> weight, Map<String, Double> limit,
             List<Map<List<Double>, String>> conditions) {
@@ -106,7 +79,44 @@ public class SalesServiceImpl implements SalesService {
     }
 
     @Override
-    public void doKmeans(int k) {
+    public double[] multiplyVarsLinear(String[] attrs, String y) {
+        return modelBaseUtil.multiplyVarsLinearRegression(attrs, y);
+    }
+
+    @Override
+    public double multiplyLinearPredict(double y_inc, String x_change) {
+        return modelBaseUtil.multPredict(y_inc, x_change);
+    }
+
+    @Override
+    public List<List<double[]>> kmeans(int k) {
         modelBaseUtil.doKmeans(k);
+        // TODO: 返回JSONObject便于处理
+        return null;
+    }
+
+
+
+    /*      生成图表功能      */
+
+    @Override
+    public File getPieChart() {
+        // TODO: 【可选】将点集分类情况返回界面
+        return DSSChartUtil.getPieChart(modelBaseUtil.getClusterCounts());
+    }
+
+    @Override
+    public File getCurveChart(String x, String y) {
+        return dssChartUtil.getCurveChart(x, y);
+    }
+
+    @Override
+    public File getLinearChart(String x, String y) {
+        String formulaKey = x + "_" + y;
+        Double[][] dots = getDots(x, y);
+        Map<String, Double> argsMap = modelBaseUtil.getArgs(formulaKey);
+        System.out.println("getLinearChart: " + formulaKey);
+        System.out.println("a: " + argsMap.get("a") + ", b: " + argsMap.get("b"));
+        return DSSChartUtil.getLinearChart(argsMap.get("a"), argsMap.get("b"), dots, x, y);
     }
 }

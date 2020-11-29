@@ -45,4 +45,8 @@ public class ImageController {
     ) throws IOException {
         return ImageIO.read(salesService.getCurveChart(x, y));
     }
+//
+//    public BufferedImage getPirChartPic() {
+//
+//    }
 }

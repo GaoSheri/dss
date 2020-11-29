@@ -6,6 +6,8 @@ import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYDotRenderer;
+import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -41,7 +43,7 @@ public class DSSChartUtil {
         JFreeChart chart = ChartFactory.createXYLineChart(
                 elem1 + "-" + elem2, elem1, elem2,
                 new XYSeriesCollection(series));
-        chart.getTitle().setFont(new Font("黑体", Font.BOLD, 18));
+        chart.getTitle().setFont(new Font("微软雅黑", Font.BOLD, 18));
         return printPic(chart, "curve_" + elem1 + "_" + elem2);
     }
 
@@ -71,6 +73,21 @@ public class DSSChartUtil {
         return printPic(chart, "linear_" + x + "_" + y);
     }
 
+    // 根据频数生成饼图
+    public static File getPieChart(Integer[] count) {
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        for (int i = 0; i < count.length; i++) {
+            dataset.setValue("类别" + i, count[i]);
+        } // 初始化数据集
+        JFreeChart chart = ChartFactory.createPieChart(
+                "企业客户定位分类饼图",
+                dataset
+        );
+        chart.setPadding(new RectangleInsets(5, 3, 5, 3));
+        chart.setAntiAlias(true);
+        chart.getTitle().setFont(new Font("微软雅黑", Font.BOLD, 18));
+        return printPic(chart, "pie_client_cluster");
+    }
 
     public static File printPic(JFreeChart chart, String filename) {
         FileOutputStream out = null;

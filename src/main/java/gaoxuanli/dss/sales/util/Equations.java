@@ -69,11 +69,10 @@ public class Equations {
         System.out.println("------- DOING CALCULATION -------");
         int bestIndex = 0;
         double result = 0.0;
-        Iterator<Double> wit = weight.stream().iterator();
         for (int i = 0; i < possibleVars.size(); i++) {
             double y = 0.0;
-            for (Integer var : possibleVars.get(i)) {
-                y += wit.next() * var;
+            for (int j = 0; j < weight.size(); j++) {
+                y += weight.get(j) * possibleVars.get(i).get(j);
             }
             goalValues.add(y);
             if (result < y) {

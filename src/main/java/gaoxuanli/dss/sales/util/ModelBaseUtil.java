@@ -1,21 +1,15 @@
 package gaoxuanli.dss.sales.util;
 
 import gaoxuanli.dss.sales.entity.SalesElems;
-import gaoxuanli.dss.sales.service.impl.SalesServiceImpl;
 import kmeans.kmeans;
 import kmeans.kmeans_data;
 import kmeans.kmeans_param;
+import org.jfree.data.json.JSONUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /*
     模型库
@@ -43,6 +37,11 @@ public class ModelBaseUtil {
     public Map<String, Map<String, Double>> oneVarLinearMap = new HashMap<>();
     private Map<String, String> formulaMap = new HashMap<>();
 
+    // 存储多元回归预测模型
+    private double[] b_value;
+    // 存储聚类结果
+    private List<List<double[]>> clients;
+
     // 获取公式的参数值（如 a, b）
     public Map<String, Double> getArgs(String formulaKey) {
         if (formulaMap.containsKey(formulaKey)) {
@@ -59,6 +58,7 @@ public class ModelBaseUtil {
         datalist.forEach(se -> data.add(se.getColumn(column)));
         return data;
     }
+
 
     // 一元线性回归模型
     public String oneVarLinearRegressionModel(List<Double> varX, List<Double> varY, String xName, String yName) {
@@ -108,8 +108,59 @@ public class ModelBaseUtil {
         return a + (b * xValue);
     }
 
+
+    // 多元线性回归模型
+    public double[] multiplyVarsLinearRegression(String[] attrs, String y) {
+        int dimension = attrs.length;
+        List<SalesElems> datalist = jdbcTemplate.query("select * from t_sales_elems", new SalesElems());
+        double[][] x_value = new double[datalist.size()][dimension];
+        double[] y_value = new double[datalist.size()];
+
+        for (int i = 0; i < datalist.size(); i++) {
+            y_value[i] = datalist.get(i).getColumn(y);
+            for (int j = 0; j < dimension; j++) {
+                x_value[i][j] = datalist.get(i).getColumn(attrs[j]);
+            } // 训练数据赋值
+        }
+        MultiplyLinearRegression multiplyLinearRegression =
+                new MultiplyLinearRegression(x_value, y_value);
+        b_value = multiplyLinearRegression.doCalculate();
+        return getBValue();
+    }
+
+    // 多元线性回归预测
+    public double multPredict(double y_inc, String x_change) {
+        System.out.println("------- multiply linear predict -------");
+        System.out.println("y_increase: " + y_inc);
+        System.out.println("predict x: " + x_change);
+
+        Map<String, String> map = new HashMap<>();
+        SalesElems ori = jdbcTemplate.query(
+                "select * from t_sales_elems where year='2010'",
+                new SalesElems()).get(0);
+        System.out.println("x[" + x_change + "] original value: " + ori.getColumn(x_change));
+
+        // TODO: 更灵活方式
+        List<String> attrs = Arrays.asList("price", "ad", "carOutput");
+        int index = attrs.indexOf(x_change) + 1; // 对应 b[]
+        Double y = ori.getProceeds() + y_inc;
+        Double dv_b = b_value[index]; // 变量系数，除数
+        double x_update = y - b_value[0]; // 便于计算
+        for (int i = 1; i < b_value.length; i++) {
+            if (i == index) continue;
+            x_update -= b_value[i] * ori.getColumn(attrs.get(i - 1));
+        } // (current) x_update = b[change] * x_change
+        x_update /= dv_b;
+        return x_update;
+    }
+
+    public double[] getBValue() {
+        return b_value;
+    }
+
+
     // 聚类
-    public Map<String, List<Double>> doKmeans(int k) {
+    public List<List<double[]>> doKmeans(int k) {
         double[][] points = {
                 // 客户号| 2008| 2009| 2010| 将来业务量（万元）
                 {18.27, 50.48, 9.99, 78.74},
@@ -139,18 +190,32 @@ public class ModelBaseUtil {
 
         // 划分为 k 类
         kmeans.doKmeans(k, data, param);
-
-        // 输出结果
-        System.out.println("The labels of points is:");
-        for (int label : data.labels) {
-            System.out.println(label + " ");
+        List<List<double[]>> labelList = new LinkedList<>();
+        for (int i = 0; i < k; i++) {
+            labelList.add(new LinkedList<>());
         }
-//
-//        for (int i = 0; i < ; i++) {
-//
-//        }
-        return null;
+        // 按划分结果存入列表
+        for (int i = 0; i < points.length; i++) {
+            int label = data.labels[i];
+            System.out.print(label + " ");
+            labelList.get(label).add(points[i]);
+        }
+
+        System.out.println("\n\n------- cluster result:\n");
+        labelList.forEach(label -> {
+            label.forEach(point -> {
+                Arrays.stream(point).forEach(d -> System.out.print(d + " "));
+                System.out.println();
+            });
+            System.out.println("\n\n");
+        });
+        clients = labelList;
+        return labelList;
     }
 
-
+    public Integer[] getClusterCounts() {
+        List<Integer> count = new ArrayList<>();
+        clients.forEach(list -> count.add(list.size()));
+        return count.toArray(new Integer[]{});
+    }
 }
