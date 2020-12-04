@@ -92,7 +92,7 @@ public class SalesServiceImpl implements SalesService {
     public List<List<double[]>> kmeans(int k) {
         modelBaseUtil.doKmeans(k);
         // TODO: 返回JSONObject便于处理
-        return null;
+        return modelBaseUtil.getClients();
     }
 
 

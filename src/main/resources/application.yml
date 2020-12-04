@@ -7,6 +7,11 @@ spring:
     username: root
     password: sheri1258
     url: jdbc:mysql://127.0.0.1/enterprise?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT
+  mvc:
+    static-path-pattern: /static/**
+  thymeleaf:
+    cache: false
+
 
 mybatis-plus:
   mapper-locations: classpath*:/gaoxuanli/dss/*/mapper/*Mapper.xml

@@ -24,18 +24,16 @@ public class Equations {
     }
 
     public JSONObject getResult() {
-        JSONObject json = new JSONObject();
         int best = solve();
+        JSONObject json = new JSONObject();
+        json.put("vars", possibleVars);
+        json.put("goals", goalValues);
         json.put("best", best);
-        JSONArray solutions = new JSONArray();
-        for (int i = 0; i < goalValues.size(); i++) {
-            JSONObject solution = new JSONObject();
-            solution.put("vars", possibleVars.get(i));
-            solution.put("value", goalValues.get(i));
-            solutions.add(solution);
-        }
-        json.put("solutions", solutions);
         return json;
+    }
+
+    public List<List<Integer>> getPossibleVars() {
+        return possibleVars;
     }
 
     // particular solution

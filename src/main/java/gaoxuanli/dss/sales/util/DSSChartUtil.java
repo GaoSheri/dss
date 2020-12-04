@@ -4,6 +4,7 @@ import gaoxuanli.dss.sales.entity.SalesElems;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYDotRenderer;
 import org.jfree.chart.ui.RectangleInsets;
@@ -86,6 +87,9 @@ public class DSSChartUtil {
         chart.setPadding(new RectangleInsets(5, 3, 5, 3));
         chart.setAntiAlias(true);
         chart.getTitle().setFont(new Font("微软雅黑", Font.BOLD, 18));
+        PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setLabelFont(new Font("微软雅黑",Font.ITALIC, 12));
+
         return printPic(chart, "pie_client_cluster");
     }
 
@@ -98,7 +102,7 @@ public class DSSChartUtil {
                 output.getParentFile().mkdirs();
             }
             out = new FileOutputStream(path);
-            ChartUtils.writeChartAsPNG(out, chart, 500, 500);
+            ChartUtils.writeChartAsPNG(out, chart, 300, 300);
             out.flush();
         } catch (Exception e) {
             e.printStackTrace();

@@ -42,6 +42,10 @@ public class ModelBaseUtil {
     // 存储聚类结果
     private List<List<double[]>> clients;
 
+    public List<List<double[]>> getClients() {
+        return clients;
+    }
+
     // 获取公式的参数值（如 a, b）
     public Map<String, Double> getArgs(String formulaKey) {
         if (formulaMap.containsKey(formulaKey)) {

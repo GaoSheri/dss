@@ -10,6 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = "gaoxuanli.dss.*.service")
 @ComponentScan(basePackages = "gaoxuanli.dss.*.controller")
 @ComponentScan(basePackages = "gaoxuanli.dss.*.util")
+@ComponentScan(basePackages = "gaoxuanli.dss.*.config")
 public class SalesApplication {
 
     public static void main(String[] args) {

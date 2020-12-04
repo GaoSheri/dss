@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en"xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- style css -->
+    <link rel="stylesheet" href="css/style.css" th:href="@{../css/style.css}">
+    <!-- Responsive-->
+    <link rel="stylesheet" href="css/responsive.css" th:href="@{../css/responsive.css}">
+</head>
+<body>
+    <table>
+        <tr>
+            <th>户外广告</th>
+            <th>专业杂志</th>
+            <th>其他形式</th>
+            <th>展露数</th>
+        </tr>
+        <tr th:each="solution : ${vars}">
+            <td th:each="var : ${solution}">
+                <p th:text="${var}"></p>
+            </td>
+            <td th:text="${goals.get(solutionStat.index)}"></td>
+        </tr>
+        <tr>
+            <td th:text="${best+1}"></td>
+        </tr>
+    </table>
+</body>
+</html>

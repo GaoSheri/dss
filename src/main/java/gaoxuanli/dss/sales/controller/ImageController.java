@@ -46,7 +46,9 @@ public class ImageController {
         return ImageIO.read(salesService.getCurveChart(x, y));
     }
 //
-//    public BufferedImage getPirChartPic() {
-//
-//    }
+    @ResponseBody
+    @GetMapping(value = "/pie", produces = MediaType.IMAGE_PNG_VALUE)
+    public BufferedImage getPirChartPic() throws IOException {
+        return ImageIO.read(salesService.getPieChart());
+    }
 }

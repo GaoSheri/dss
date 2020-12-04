@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+    <table>
+        <tr th:each="category : ${clientCate}">
+            <td th:each="clients : ${category}">
+                <p th:each="d : ${clients}">
+                    <p th:text="${d}"></p>
+                </p>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</body>
+</html>

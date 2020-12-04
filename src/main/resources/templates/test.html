@@ -1,10 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>销售决策支持系统</title>
+    <!-- style css -->
+    <link rel="stylesheet" href="css/style.css" th:href="@{../css/style.css}">
+    <!-- Responsive-->
+    <link rel="stylesheet" href="css/responsive.css" th:href="@{../css/responsive.css}">
 </head>
 <body>
-<h1>test!!!!!</h1>
+<!-- header inner -->
+<div class="up_content">
+    <div class="container">
+        <div class="right_toolbar">
+            <div class="logo">
+                <a th:href="@{../index.html}"><img width="130" src="images/sherilogo_particular.png"
+                                                   th:src="@{../images/sherilogo_particular.png}"
+                                                   alt="#"/></a>
+            </div>
+            <ul class="right_sidebar">
+                <li class="nav_item">
+                    <a class="nav-link" href="index.html" th:href="@{../index.html}"> Home </a>
+                </li>
+                <li class="nav_item">
+                    <a class="nav-link" href="#">企业销售决策支持系统</a>
+                </li>
+                <li class="nav_item">
+                    <a class="nav-link" href="/client">企业客户定位决策支持系统</a>
+                </li>
+                <li class="nav_item">
+                    <div class="sign_btn"><a href="#">Sign in</a></div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="datatable">
+            <table title="企业2001-2010年各年销售因素数据">
+                <thead>
+                <tr>
+                    <th>年份</th>
+                    <th>销售量<br>（万台）</th>
+                    <th>价格<br>（元）</th>
+                    <th>广告支出（万元）</th>
+                    <th>汽车产量（万台）</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="salesElems : ${list}">
+                    <td th:text="${salesElems.year}"></td>
+                    <td th:text="${salesElems.proceeds}"></td>
+                    <td th:text="${salesElems.price}"></td>
+                    <td th:text="${salesElems.ad}"></td>
+                    <td th:text="${salesElems.carOutput}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="menu_box">
+            <div class="sign_btn">
+                <a href="/image/curve/proceeds/ad" target="showImageFrame">关系曲线 </a>
+            </div>
+            <input type="text" name="x" size="15" value="x: proceeds">
+            <input type="text" name="y" size="15" value="y: ad">
+            <div class="sign_btn">
+                <a href="/multiplyLinear" target="showDataFrame"> 需求预测模型 </a><br>
+            <input type="text" name="y" size="15" value="y: proceeds">
+            </div>
+            <div class="sign_btn">
+                <a href="/multiplyPredict" target="showDataFrame"> 预测 </a>
+            <input type="text" name="y_inc" size="15" value="y_inc: 10%">
+            <input type="text" name="x_change" size="15" value="x_change: ad, price">
+            </div>
+            <div class="sign_btn">
+                <a href="/sales/ad" target="showDataFrame">广告决策 </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="show_area">
+    <iframe name="showDataFrame">
+    </iframe>
+    <iframe name="showImageFrame">
+    </iframe>
+</div>
 </body>
 </html>

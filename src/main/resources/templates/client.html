@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>客户决策支持系统</title>
+    <!-- style css -->
+    <link rel="stylesheet" href="css/style.css" th:href="@{../css/style.css}">
+    <!-- Responsive-->
+    <link rel="stylesheet" href="css/responsive.css" th:href="@{../css/responsive.css}">
+</head>
+<body>
+<div class="up_content">
+    <div class="container">
+        <div class="right_toolbar">
+            <div class="logo">
+                <a th:href="@{../index.html}"><img width="130" src="images/sherilogo_particular.png"
+                                                   th:src="@{../images/sherilogo_particular.png}"
+                                                   alt="#"/></a>
+            </div>
+            <ul class="right_sidebar">
+                <li class="nav_item">
+                    <a class="nav-link" href="index.html" th:href="@{../index.html}"> Home </a>
+                </li>
+                <li class="nav_item">
+                    <a class="nav-link" href="/sales/dataTable">企业销售决策支持系统</a>
+                </li>
+                <li class="nav_item">
+                    <a class="nav-link" href="#">企业客户定位决策支持系统</a>
+                </li>
+                <li class="nav_item">
+                    <div class="sign_btn"><a href="#">Sign in</a></div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="datatable">
+            <table title="客户2008-2010及预测数据">
+                <thead>
+                <tr>
+                    <th> 客户号</th>
+                    <th> 2008年</th>
+                    <th> 2009年</th>
+                    <th> 2010年</th>
+                    <th> 将来业务量</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="client : ${clientList}"> <!--list-->
+                    <td th:text="${clientStat.index}"></td>
+                    <td th:each="price : ${client}">
+                        <p th:text="${price}"></p>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="menu_box">
+            <div class="sign_btn">
+                <a href="/kmeans" target="showDataFrame"> 聚类分析 </a>
+            </div>
+            <input type="text" name="k" size="15" value="k: 4">
+            <div class="sign_btn">
+                <a href="/image/pie" target="showImageFrame"> 生成饼图 </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="show_area">
+    <iframe name="showDataFrame">
+    </iframe>
+    <iframe name="showImageFrame">
+    </iframe>
+</div>
+</body>
+</html>
